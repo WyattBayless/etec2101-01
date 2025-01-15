@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\person.h">
+    <ClInclude Include="..\..\include\examples\person.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

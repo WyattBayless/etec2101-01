@@ -20,6 +20,25 @@ private:
 	unsigned int hours_worked;
 
 public:
+	// Constructor
+	Person();
+
+	Person(int starting_id, std::string start_fname, std::string start_lname);
+
+	//Destructor (called when an instance is about to be destroyed)
+	~Person();   // Always has the name of the class. Only one!!
+
+	//GETTER methods
+	int get_id();
+	std::string get_first_name();
+	std::string get_last_name();
+	float get_hourly_rate();
+	unsigned int get_hours_worked();
+
+	//SETTER methods
+	void set_hourly_rate(float new_rate);
+	void set_hours_worked(unsigned int new_hours);
+
 	//METHOD -- a function that instances of the class can call
 	float calculate_wage();
 };

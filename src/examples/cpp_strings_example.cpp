@@ -30,17 +30,28 @@ int main()
     //Our goal with data structures will be to make constructs like this
     //that simplify the job of the user.
 
-    cout << "x" << x << "Hello World!\n";
+    cout << "x" << x << "Hello World!\n";*/
 
     //Some code that uses the Person class
-    Person p;
-    Person q;
+    Person p(42, "Bob", "Jones");
+    Person q(43, "Sally", "Smith");
 
-    p.first_name = "Bob";
-    q.first_name = "Sally";
+    p.set_hourly_rate(15.0f);
+    p.set_hours_worked(38);
+    q.set_hourly_rate(16.75f);
+    q.set_hours_worked(42);
 
-    std::cout << p.id << " " << p.first_name;
+    // We can also DYNAMICALLY allocate a person object
+    Person* pptr = new Person(44, "Eric", "Davis");   //like mallac (new is preferred
+                                                      // b/c it works with Classes
+    pptr->set_hourly_rate(12.15f);
+    pptr->set_hours_worked(23);
+    (*pptr).set_hourly_rate(12.35f);                //Same as above line but uglier
 
-    cin >> x;         //Waiting for the user to enter a value for x
-    */
+    delete pptr;                                    // Like free -- frees up the memory
+                                                    // pptr points to.
+
+    std::cout << p.get_id() << " " << p.get_first_name() << "\n";
+
+    //cin >> x;         //Waiting for the user to enter a value for x
 }

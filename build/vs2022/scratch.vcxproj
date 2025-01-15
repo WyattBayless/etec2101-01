@@ -10,6 +10,13 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\examples\person.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\examples\cpp_strings_example.cpp" />
+    <ClCompile Include="..\..\src\examples\person.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -83,13 +90,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\include\person.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\src\examples\cpp_strings_example.cpp" />
-    <ClCompile Include="..\..\src\examples\person.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
