@@ -49,9 +49,17 @@ int main()
     (*pptr).set_hourly_rate(12.35f);                //Same as above line but uglier
 
     delete pptr;                                    // Like free -- frees up the memory
-                                                    // pptr points to.
+                                                    // pptr points to. The C++ runtime
+                                                    // 
+    pptr = NULL;        // NULL is just a macro for 0
+    int y = NULL;       // valid but 
+
+
 
     std::cout << p.get_id() << " " << p.get_first_name() << "\n";
 
-    //cin >> x;         //Waiting for the user to enter a value for x
+    // p and q were allocated on the STACK (an area of memory). STACK is 
+    // where "temporary" variables (parameters in functions, p and q here.
+    // HEAP memory is where dynamically allocated memory comes from. 
+    // 
 }
