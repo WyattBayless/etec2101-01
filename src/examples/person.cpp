@@ -8,7 +8,7 @@ Person::Person()
 	id = -1;
 	first_name = "?";
 	last_name = "?";
-	hourly_rate = 0;
+	hourly_rate = 0.0f;
 	hours_worked = 0;
 }
 
