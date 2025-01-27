@@ -1,0 +1,63 @@
+#include <person.h>
+
+namespace example
+{
+	class PersonDatabase
+	{
+	private:
+		// int* temp;		// Does temp point to a single int?
+		// int x = 70;
+		// temp = &x;
+		// temp = (int*)malloc(sizeof(int) * 100); // an array of 100 ints
+		// temp[0] = 77;
+		// temp[1] = 78;
+									// Or an array?
+									// Could be both
+
+		Person* my_array;			// This WILL hold (eventually)
+		// an array of Person objects.
+		unsigned int my_array_size; // The size of the my_array array
+
+		//Person my_data[100]		// No! Can't go over
+									// 100 entires
+
+	public:
+		// This method should open the file, probably
+		// reading in one person per line like this
+		// 101 John Doe 42 13.5
+		// 102 Sally Smith 18 19.75
+		example::PersonDatabase(std::string fname);
+
+		// Adds a person
+		void add_person(temp_person);
+
+	};
+
+	// Close the file
+}
+
+void example::PersonDatabase::add_person(example::Person p)
+{
+	// Case1: nothing in the array
+	//		Code: make an array of size 1 and put p in the only spot
+	if (my_array_size == 0)
+	{
+		my_array = new Person[1];
+		my_array[0] = p;
+		my_array_size = 1;
+	}
+
+	// Case2: array is already there (slide 16)
+	//		Code: Make an array of my_array_size = 1
+	//			  Code data from existing array to that new array
+	//			  Free up the old array
+	//			  Make my_array point to the larger array
+	//			  Make the size one bigger
+	//			  Put p into the last spot in that array
+	else
+	{
+
+	}
+
+}
+

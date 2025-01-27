@@ -11,19 +11,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\examples\person.h" />
+    <ClCompile Include="..\..\src\examples\person.cpp" />
+    <ClCompile Include="..\..\src\lab01\person_database.cpp" />
+    <ClCompile Include="..\..\src\lab01_main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\examples\person.cpp" />
-    <ClCompile Include="..\..\src\examples\oop_basics_example.cpp" />
+    <ClInclude Include="..\..\include\examples\person.h" />
+    <ClInclude Include="..\..\include\person_database.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{EB763402-5633-48D5-98E6-DD1622DED7F7}</ProjectGuid>
-    <RootNamespace>ssuds</RootNamespace>
+    <ProjectGuid>{4ca43784-b2af-44e8-b2d9-8d13a511de02}</ProjectGuid>
+    <RootNamespace>Lab01</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>scratch</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -56,10 +57,6 @@
     <IntDir>..\..\temp\($ProjectName)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\..\bin\$(Configuration)\</OutDir>
-    <IntDir>..\..\temp\($ProjectName)\$(Configuration)\</IntDir>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -81,7 +78,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\include\;..\..\include\examples\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

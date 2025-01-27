@@ -6,41 +6,55 @@
 #define _PERSON_H_
 #include <string>
 
-class Person
+// Make Person a part of the example namespace
+// put additional things in the same namespace in other files
+// by doing the same thing we have here
+namespace example
 {
-	//By default everything [attributes and methods] is PRIVATE (we can only access it in the class)
-	// Good rule of thumb make attributes private and have methods to INDIRECTLY
-	// access them public.
-private:
-	//ATTRIBUTES -- A variable that all instance of the class have
-	int id;
-	std::string first_name;
-	std:: string last_name;
-	float hourly_rate;
-	unsigned int hours_worked;
+	/// <summary>
+	/// This is a class that illustrates how to use OOP concepts in C++
+	/// </summary>
+	class Person
+	{
+		//By default everything [attributes and methods] is PRIVATE (we can only access it in the class)
+		// Good rule of thumb make attributes private and have methods to INDIRECTLY
+		// access them public.
+	private:
+		//ATTRIBUTES -- A variable that all instance of the class have
+		int id;
+		std::string first_name;
+		std::string last_name;
+		float hourly_rate;
+		unsigned int hours_worked;
 
-public:
-	// Constructor
-	Person();
+	public:
+		// Constructor
 
-	Person(int starting_id, std::string start_fname, std::string start_lname);
+		/// <summary>
+		/// This is the default constructor for the Person class
+		/// </summary>
+		Person();
 
-	//Destructor (called when an instance is about to be destroyed)
-	~Person();   // Always has the name of the class. Only one!!
+		Person(int starting_id, std::string start_fname, std::string start_lname);
 
-	//GETTER methods
-	int get_id();
-	std::string get_first_name();
-	std::string get_last_name();
-	float get_hourly_rate();
-	unsigned int get_hours_worked();
+		//Destructor (called when an instance is about to be destroyed)
+		~Person();   // Always has the name of the class. Only one!!
 
-	//SETTER methods
-	void set_hourly_rate(float new_rate);
-	void set_hours_worked(unsigned int new_hours);
+		//GETTER methods
+		int get_id();
+		std::string get_first_name();
+		std::string get_last_name();
+		float get_hourly_rate();
+		unsigned int get_hours_worked();
 
-	//METHOD -- a function that instances of the class can call
-	float calculate_wage();
-};
+		//SETTER methods
+		void set_hourly_rate(float new_rate);
+		void set_hours_worked(unsigned int new_hours);
+
+		//METHOD -- a function that instances of the class can call
+		/// <returns> The wage for this person is returned here </return>
+		float calculate_wage();
+	};
+}
 
 #endif
