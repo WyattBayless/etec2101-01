@@ -1,5 +1,9 @@
 #include <person_database.h>
 #include <person.h>
+#include <iostream>
+#include <fstream>
+
+#define FNAME "..\\..\\media\\person_database.txt"
 
 example::PersonDatabase::PersonDatabase(std::string fname)
 {
@@ -9,8 +13,15 @@ example::PersonDatabase::PersonDatabase(std::string fname)
 
 	// Open the file
 
+	std::ifstream fin(FNAME);
+	if (!fin.is_open())
+	{
+		std::cout << "Error opening file '" << FNAME << "'\n";
+		return 1;
+	}
+
 	//Read through the file, line-by-line
-	while (? ? ? )
+	while (true)
 	{
 		// Get a line's worth of data
 		int temp_id;
@@ -19,6 +30,16 @@ example::PersonDatabase::PersonDatabase(std::string fname)
 		unsigned int temp_hours;
 
 		// <code to read into those>
+		fin >> temp_id;
+		fin.ignore(1000, ':');
+		std::getline(fin, temp_fname);
+		fin.ignore(1000, ':');
+		std::getline(fin, temp_lname);
+		fin.ignore(1000, ':');
+		fin >> temp_hourly_rate;
+		fin.ignore(1000, ':');
+		fin >> temp_hours;
+
 
 		// <code to decide if its read properly>
 		if (? ? ? )
@@ -26,6 +47,8 @@ example::PersonDatabase::PersonDatabase(std::string fname)
 			Person temp_person(temp_id, temp_fname, temp_lname);
 			temp_person.set_hourly_rate(temp_hourly_rate);
 			temp_person.set_hours_worked(temp_hours);
+
+
 
 			// Use our add_person to do the hard work
 			add_person(temp_person);
@@ -54,7 +77,10 @@ void example::PersonDatabase::add_person(example::Person p)
 	//			  Put p into the last spot in that array
 	else
 	{
-
+		//Rework to function more like Case2 description
+		//my_array = new Person[1];
+		//my_array[my_array_size] = p;
+		//my_array_size += 1;
 	}
 
 }
