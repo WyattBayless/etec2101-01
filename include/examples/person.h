@@ -21,9 +21,21 @@ namespace example
 		// access them public.
 	private:
 		//ATTRIBUTES -- A variable that all instance of the class have
+
+		/// <summary>
+		/// This is the (unique) ID# of this Person
+		/// </summary>
 		int id;
+
+		/// <summary>
+		/// This is the first name of this Person
+		/// </summary>
 		std::string first_name;
 		std::string last_name;
+
+		/// <summary>
+		/// This is the amount (in dollars) this Person makes per hour
+		/// </summary>
 		float hourly_rate;
 		unsigned int hours_worked;
 
@@ -48,10 +60,19 @@ namespace example
 		unsigned int get_hours_worked();
 
 		//SETTER methods
+
+		/// <summary>
+		/// This sets the hourly rate
+		/// </summary>
+		/// <param name="new_rate">This is the new rate</param>
 		void set_hourly_rate(float new_rate);
 		void set_hours_worked(unsigned int new_hours);
 
 		//METHOD -- a function that instances of the class can call
+
+		/// <summary>
+		/// A getter for wage
+		/// </summary>
 		/// <returns> The wage for this person is returned here </return>
 		float calculate_wage();
 	};
