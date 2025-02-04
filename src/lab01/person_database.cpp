@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <string.h>
 
 example::PersonDatabase::PersonDatabase(std::string fname)
 {
@@ -22,7 +23,7 @@ example::PersonDatabase::PersonDatabase(std::string fname)
 	}
 
 	//Read through the file, line-by-line
-	while (check >= 6)
+	while (true)
 	{
 		// Get a line's worth of data
 		int temp_id;
@@ -32,15 +33,20 @@ example::PersonDatabase::PersonDatabase(std::string fname)
 
 		// <code to read into those>
 		// Reads each element, seperated by commas
+
 		fin >> temp_id;
-		fin.ignore(1000, ',');
+		fin.ignore(1000, ':');
 		std::getline(fin, temp_fname);
-		fin.ignore(1000, ',');
+		fin.ignore(1000, ':');
 		std::getline(fin, temp_lname);
-		fin.ignore(1000, ',');
+		fin.ignore(1000, ':');
 		fin >> temp_hourly_rate;
-		fin.ignore(1000, ',');
+		fin.ignore(1000, ':');
 		fin >> temp_hours;
+		fin.ignore(1000, '\n');
+
+
+		std::cout << "Values read in:\n\tID=" << temp_id << "\n\tfname=" << temp_fname << "\n\tlname='" << temp_lname << "'\n";
 
 
 		// <code to decide if its read properly>
@@ -52,13 +58,14 @@ example::PersonDatabase::PersonDatabase(std::string fname)
 
 			// Use our add_person to do the hard work
 			add_person(temp_person);
+
+			std::cout << "here\n";
 		}
 
-		//if (check >= 2)
-		//{
-			//break;
-		//}
-		check++;
+		if (fin.eof())
+		{
+			break;
+		}
 	}
 	// Close the file
 	fin.close();
