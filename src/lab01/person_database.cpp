@@ -2,26 +2,27 @@
 #include <person.h>
 #include <iostream>
 #include <fstream>
-
-#define FNAME "..\\..\\media\\person_database.txt"
+#include <string>
 
 example::PersonDatabase::PersonDatabase(std::string fname)
 {
 	// Initialize attributes
 	my_array = nullptr;			// This means we (right now) don't have data
 	my_array_size = 0;
+	temp_array = nullptr;
+	int check = 0;
 
 	// Open the file
 
-	std::ifstream fin(FNAME);
+	std::ifstream fin(fname);
 	if (!fin.is_open())
 	{
-		std::cout << "Error opening file '" << FNAME << "'\n";
-		return 1;
+		std::cout << "Error opening file '" << fname << "'\n";
+		return;
 	}
 
 	//Read through the file, line-by-line
-	while (true)
+	while (check >= 6)
 	{
 		// Get a line's worth of data
 		int temp_id;
@@ -30,31 +31,42 @@ example::PersonDatabase::PersonDatabase(std::string fname)
 		unsigned int temp_hours;
 
 		// <code to read into those>
+		// Reads each element, seperated by commas
 		fin >> temp_id;
-		fin.ignore(1000, ':');
+		fin.ignore(1000, ',');
 		std::getline(fin, temp_fname);
-		fin.ignore(1000, ':');
+		fin.ignore(1000, ',');
 		std::getline(fin, temp_lname);
-		fin.ignore(1000, ':');
+		fin.ignore(1000, ',');
 		fin >> temp_hourly_rate;
-		fin.ignore(1000, ':');
+		fin.ignore(1000, ',');
 		fin >> temp_hours;
 
 
 		// <code to decide if its read properly>
-		if (? ? ? )
+		if (!fin.fail())
 		{
-			Person temp_person(temp_id, temp_fname, temp_lname);
+			example::Person temp_person(temp_id, temp_fname, temp_lname);
 			temp_person.set_hourly_rate(temp_hourly_rate);
 			temp_person.set_hours_worked(temp_hours);
-
-
 
 			// Use our add_person to do the hard work
 			add_person(temp_person);
 		}
+
+		//if (check >= 2)
+		//{
+			//break;
+		//}
+		check++;
 	}
 	// Close the file
+	fin.close();
+}
+
+example::PersonDatabase::~PersonDatabase()
+{
+	// Come back to this
 }
 
 void example::PersonDatabase::add_person(example::Person p)
@@ -69,7 +81,7 @@ void example::PersonDatabase::add_person(example::Person p)
 	}
 
 	// Case2: array is already there (slide 16)
-	//		Code: Make an array of my_array_size = 1
+	//		Code: Make an array of my_array_size + 1
 	//			  Code data from existing array to that new array
 	//			  Free up the old array
 	//			  Make my_array point to the larger array
@@ -78,9 +90,31 @@ void example::PersonDatabase::add_person(example::Person p)
 	else
 	{
 		//Rework to function more like Case2 description
-		//my_array = new Person[1];
-		//my_array[my_array_size] = p;
-		//my_array_size += 1;
+		temp_array = new Person[my_array_size + 1];
+		for (unsigned int i = 0; i < my_array_size; i++)
+		{
+			temp_array[i] = my_array[i];
+		}
+		delete[] my_array;
+		my_array = temp_array;
+		my_array[my_array_size] = p;
+		my_array_size++;
 	}
+}
 
+bool example::PersonDatabase::remove_person(unsigned int id_to_remove)
+{
+	bool found = false;
+	unsigned int index;
+	for(unsigned int i=0; i<my_array_size;i++)
+	{
+		if (my_array[i].get_id() == id_to_remove)
+		{
+			found = true;
+			index = i;
+			break;
+		}
+	}
+	if (!found)
+		return false;
 }

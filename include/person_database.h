@@ -18,6 +18,8 @@ namespace example
 									// an array of Person objects.
 		unsigned int my_array_size; // The size of the my_array array
 
+		Person* temp_array;
+
 		//Person my_data[100]		// No! Can't go over
 									// 100 entires
 
@@ -26,10 +28,16 @@ namespace example
 		// reading in one person per line like this
 		// 101 John Doe 42 13.5
 		// 102 Sally Smith 18 19.75
-		example::PersonDatabase(std::string fname);
+		PersonDatabase(std::string fname);
+
+		~PersonDatabase();
 
 		// Adds a person
-		void add_person(Person p);
+		void add_person(example::Person p);
+
+		// Removes a person
+		bool remove_person(unsigned int id_to_remove);
+
 	};
 
 }

@@ -7,12 +7,12 @@
 
 int main(int argc, char** argv)
 {
-#if MAIN_MODE == 0
+#if MAIN_MODE == 1
 	//std::ofstream fout;
 	//fout.open(*test.txt);
 
-	int x = 42;
-	float y = 3.14f;
+	int x = 52;
+	float y = 4.15f;
 	std::string s = "Hello World";
 	//std::ofstream fout("test.txt");		// Have a connection to that file (makes
 										// the file no matter what, or overwrites it)
