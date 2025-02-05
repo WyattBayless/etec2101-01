@@ -23,7 +23,7 @@
     <ClCompile Include="..\..\src\examples\person.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\file_io_example.cpp">
+    <ClCompile Include="..\..\src\examples\cpp_strings_example.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

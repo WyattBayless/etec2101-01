@@ -23,7 +23,7 @@ example::Person::Person(int start_id, std::string start_fname, std::string start
 example::Person::~Person()
 {
 	// We didn't allocate any resources so no code is necessary
-	std::cout << "Person '" << first_name << " " << last_name << "' is about to die!\n";
+	//std::cout << "Person '" << first_name << " " << last_name << "' is about to die!\n";
 }
 
 int example::Person::get_id()

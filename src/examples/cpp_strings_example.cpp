@@ -33,8 +33,8 @@ int main()
     cout << "x" << x << "Hello World!\n";*/
 
     //Some code that uses the Person class
-    Person p(42, "Bob", "Jones");
-    Person q(43, "Sally", "Smith");
+    example::Person p(42, "Bob", "Jones");
+    example::Person q(43, "Sally", "Smith");
 
     p.set_hourly_rate(15.0f);
     p.set_hours_worked(38);
@@ -42,8 +42,8 @@ int main()
     q.set_hours_worked(42);
 
     // We can also DYNAMICALLY allocate a person object
-    Person* pptr = new Person(44, "Eric", "Davis");   //like mallac (new is preferred
-                                                      // b/c it works with Classes
+    example::Person* pptr = new example::Person(44, "Eric", "Davis");   //like mallac (new is preferred
+                                                                // b/c it works with Classes
     pptr->set_hourly_rate(12.15f);
     pptr->set_hours_worked(23);
     (*pptr).set_hourly_rate(12.35f);                //Same as above line but uglier

@@ -15,10 +15,12 @@ namespace example
 									// Could be both
 
 		Person* my_array;			// This WILL hold (eventually)
-									// an array of Person objects.
+		// an array of Person objects.
 		unsigned int my_array_size; // The size of the my_array array
 
 		Person* temp_array;
+
+		std::string file_name;
 
 		//Person my_data[100]		// No! Can't go over
 									// 100 entires
@@ -37,6 +39,9 @@ namespace example
 
 		// Removes a person
 		bool remove_person(unsigned int id_to_remove);
+
+		// Returns the number of people in database
+		int get_num_people();
 
 	};
 

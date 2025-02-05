@@ -1,3 +1,3 @@
-1234:Wyatt:Bayless:8.0:40
-5678:Jason:Witherall:9.5:38
-9010:John:Doe:10.2:42
+1234:Wyatt:Bayless:8:40
+5678:Jason:Witherall:7.5:43
+9101:John:Doe:10.2:38
