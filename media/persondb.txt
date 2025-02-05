@@ -1,3 +1,0 @@
-1234:Wyatt:Bayless:8.00:40
-5678:Jason:Witherall:7.50:43
-4444:Reed:Richards:4.40:44
