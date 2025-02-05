@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string>
 #include <string.h>
+#include <sstream>
+#include <iomanip>
 
 #define FNAME "..\\..\\media\\persondb.txt"  // I tried putting the fname string into a 
 											 // new attribute string, since we can't pass 
@@ -69,18 +71,15 @@ example::PersonDatabase::PersonDatabase(std::string fname)
 
 example::PersonDatabase::~PersonDatabase()
 {
-	std::cout << my_array_size;
-	std::cout << FNAME;
-
 	std::ofstream fout(FNAME);
 	for (unsigned int i = 0; i < my_array_size; i++)
 	{
 		fout << my_array[i].get_id() << ":" << my_array[i].get_first_name() << ":" 
-			 << my_array[i].get_last_name() << ":" << my_array[i].get_hourly_rate() << ":"
+			 << my_array[i].get_last_name() << ":" << std::fixed << std::setprecision(2) << my_array[i].get_hourly_rate() << ":"
 			 << my_array[i].get_hours_worked() << "\n";
 	}
 	//delete[] my_array;  // having delete for this caused an error, 
-						  // I suppose because it gets deleted as part of add_person
+						  // I suppose because it gets deleted as part of add_person and delete_person
 						  // and then points to temp_array
 	delete[] temp_array;
 
@@ -107,19 +106,19 @@ void example::PersonDatabase::add_person(example::Person p)
 	//			  Put p into the last spot in that array
 	else
 	{
-		//Rework to function more like Case2 description
 		temp_array = new Person[my_array_size + 1];
+
 		for (unsigned int i = 0; i < my_array_size; i++)
 		{
 			if (my_array[i].get_id() == p.get_id())
 			{
-				std::runtime_error("ID Number already exists");
+				throw std::runtime_error("ID Number" + std::to_string(p.get_id()) + "already exists");
 			}
 			temp_array[i] = my_array[i];
 		}
 		delete[] my_array;
 		my_array = temp_array;
-		my_array[my_array_size] = p;
+		my_array[my_array_size] = p;	// Sometimes causes warning but runs fine
 		my_array_size++;
 	}
 }
@@ -148,11 +147,15 @@ bool example::PersonDatabase::remove_person(unsigned int id_to_remove)
 	// Decrement my_array_size 
 
 	temp_array = new Person[my_array_size - 1];
-	for (unsigned int i = 0;i < my_array_size;i++)
+	for (unsigned int i = 0; i < my_array_size; i++)
 	{
-		if (i != index)
+		if (i < index) // Before index
 		{
-			temp_array[i] = my_array[i];
+			temp_array[i] = my_array[i];	// Sometimes causes warning but runs fine
+		}
+		if (i > index) // After index
+		{
+			temp_array[i - 1] = my_array[i];	// Sometimes causes warning but runs fine
 		}
 	}
 	delete[] my_array;
@@ -162,6 +165,25 @@ bool example::PersonDatabase::remove_person(unsigned int id_to_remove)
 
 int example::PersonDatabase::get_num_people()
 {
-	return my_array_size;
+	return my_array_size-1;
 }
 
+std::string example::PersonDatabase::to_string()
+{
+	std::stringstream db_stream;
+	float total = 0;
+	db_stream << "Person\t\t\tID\tHours\t\tRate\t\tMonthly Salary\n";  // Top headers
+	db_stream << "======\t\t\t==\t=====\t\t====\t\t==============\n";  // Top lines
+	for (unsigned int i = 0; i < my_array_size; i++) // All Persons
+	{
+		db_stream << my_array[i].get_first_name() << " " << my_array[i].get_last_name() << "\t\t"
+			<< my_array[i].get_id() << "\t" << my_array[i].get_hours_worked() << "\t\t$" << std::fixed << std::setprecision(2) << my_array[i].get_hourly_rate()
+			<< "\t\t$" << my_array[i].calculate_wage() << "\n";
+		total += my_array[i].calculate_wage();
+	}
+	db_stream << "==============================================================================\n"; // Bottom Line
+	db_stream << "\t\t\t\t\t\t\t Total: $" << total << "\n\n"; // Total
+	std::string complete_string;
+	complete_string = db_stream.str();
+	return complete_string;
+}
