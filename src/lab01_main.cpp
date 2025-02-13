@@ -1,205 +1,133 @@
-// Wyatt Bayless
-// ETEC2101-01
-// Lab 01
-
-#include <person.h>
-#include <person_database.h>
 #include <iostream>
+#include <person_database.h>
+#include <person.h>				// <- not necessary, but OK to (re-) include
 
-// Note: Addressing what the labs specs say, I have the ssuds project with everything properly organized (hopefully),
-//		 the Github repo, the Person Database class with all the methods, a main program that creates a Person Database
-//		 and runs through a loop, and the columns in to_string line up decently well. I didn't get around to doing the doxygen
-//		 stuff, but then again there are more points available then needed so that should be ok. 
+// These macros and functions weren't necessary, but helped de-clutter the main
+#define BIG_UINT std::numeric_limits<unsigned int>::max()
+#define BIG_INT std::numeric_limits<unsigned int>::max()
+#define MAX_INPUT_SIZE 1000
+
+unsigned int input_uint(std::string prompt, std::string error_msg)
+{
+	unsigned int result;
+	std::cout << prompt;
+	std::cin >> result;
+	if (std::cin.fail())
+	{
+		std::cout << error_msg;
+		std::cin.clear();
+		std::cin.ignore(MAX_INPUT_SIZE, '\n');
+		return BIG_UINT;
+	}
+	else
+		return result;
+}
+
+bool input_person(example::Person* in_ptr)
+{
+	unsigned int temp_id = input_uint("\tEnter ID: ", "Invalid integer\n");
+	if (temp_id == BIG_UINT)
+		return false;
+
+	std::cout << "\tEnter Hourly Rate: ";
+	float temp_rate;
+	std::cin >> temp_rate;
+	if (std::cin.fail())
+	{
+		std::cout << "Invalid float\n";
+		std::cin.clear();
+		std::cin.ignore(MAX_INPUT_SIZE, '\n');
+		return false;
+	}
+
+	
+	std::cout << "\tEnter Hours worked: ";
+	int temp_hours;
+	std::cin >> temp_hours;
+	if (std::cin.fail())
+	{
+		std::cout << "Invalid integer\n";
+		std::cin.clear();
+		std::cin.ignore(MAX_INPUT_SIZE, '\n');
+		return false;
+	}
+
+	std::cin.ignore(MAX_INPUT_SIZE, '\n');
+	std::string temp_first_name, temp_last_name;
+	std::cout << "\tEnter First Name: ";
+	std::getline(std::cin, temp_first_name);
+	//std::cin.ignore(MAX_INPUT_SIZE, '\n');
+	//std::cin >> temp_first_name;
+	//std::cin.ignore(MAX_INPUT_SIZE, '\n');
+	std::cout << "\tEnter Last Name: ";
+	//std::cin >> temp_last_name;
+	std::getline(std::cin, temp_last_name);
+	//std::cin.ignore(MAX_INPUT_SIZE);
+
+	*in_ptr = example::Person(temp_first_name, temp_last_name, temp_id, temp_rate);
+	in_ptr->set_hours_worked(temp_hours);
+
+	return true;
+}
+
 
 int main(int argc, char** argv)
 {
-	// In this constructor, you'll read in the contents of the
-	// text file into an array of Person objects. DO NOT use any
-	// container types (std::vector, std::list, etc.)
+	bool show_menu = true;
+	example::PersonDatabase PD("..\\..\\media\\person_data.txt");
+	unsigned int menu_choice = 200;
 
-	// Each person in persondb should have their own line, with information
-	// in the order of ID number, First Name, Last Name, Hourly Rate, and then Hours worked.
-	// Each element should be seperated by a colon
-	example::PersonDatabase PD("..\\..\\media\\persondb.txt");
-
-	int option;
-	while (true) 
+	while (menu_choice != 9)
 	{
-		// Options
-		std::cout << "1. Add a Person\n";
-		std::cout << "2. Remove a Person\n";
-		std::cout << "3. Print Database\n";
-		std::cout << "4. Quit\n\n";
-		std::cout << "Choose an option (input number option and press ENTER)\n\n";
-		std::cin >> option;
-
-		// Bad option inputted
-		if (std::cin.fail() || option > 4) 
+		// Show the menu if we need to
+		if (show_menu)
 		{
-			std::cout << "Invalid option. Please Try Again\n\n";
-			std::cin.clear();
-			continue;
+			std::cout << "PERSON DATABASE main menu\n=========================\n";
+			std::cout << "1. Add a person\n2. Remove a person\n3. Generate report\n9. Quit\n\n";
+			show_menu = false;
 		}
 
-		//Add a Person
-		if (option == 1)
+		// Show a prompt and get the menu choice
+		menu_choice = input_uint(">>> ", "Invalid menu choice\n\n");
+		if (menu_choice == BIG_UINT)
+			show_menu = true;
+
+		// Now process each menu choice (note the quit case is handled by the while condition)
+		example::Person temp_person;
+		unsigned int temp_id;
+		switch (menu_choice)
 		{
-			// Get a line's worth of data
-			unsigned int temp_id;
-			std::string temp_fname, temp_lname;
-			float temp_hourly_rate;
-			unsigned int temp_hours;
-
-			// User Inputs all data
-			// This looks long but it's mainly just to check each input for misinputs.
-			// If the user misinputs once they get to try again. If twice they return to Main Menu
-
-			std::cout << "\nEnter ID Number:";
-			std::cin >> temp_id;
-			if (std::cin.fail()) 
+		case 1:
+			// Add Person
+			if (input_person(&temp_person))
 			{
-				std::cout << "\nInvalid Input. Please Input a Positive Integer\n";
-				std::cin.clear();
-				std::cin.ignore(100, '\n');
-				std::cout << "Enter ID Number:";
-				std::cin >> temp_id;
-				if (std::cin.fail())
-				{ 
-					std::cout << "\nReturning to Main Menu. Please use correct inputs next time.\n";
-					std::cin.clear();
-					std::cin.ignore(100, '\n');
-					continue;
-				}
-			}
-			std::cout << "Enter First Name:";
-			std::cin >> temp_fname;
-			if (std::cin.fail())
-			{
-				std::cout << "\nInvalid Input. Please Input a proper first name\n";
-				std::cin.clear();
-				std::cin.ignore(100, '\n');
-				std::cout << "Enter First Name:";
-				std::cin >> temp_fname;
-				if (std::cin.fail())
+				// I'm using exception-handling here to attempt to add.  If it fails (because we
+				// have an invalid index#), just print an error message
+				try
 				{
-					std::cout << "\nReturning to Main Menu. Please use correct inputs next time.\n";
-					std::cin.clear();
-					std::cin.ignore(100, '\n');
-					continue;
+					PD.add_person(temp_person);
 				}
-			}
-			std::cout << "Enter Last Name:";
-			std::cin >> temp_lname;
-			if (std::cin.fail())
-			{
-				std::cout << "\nInvalid Input. Please Input a proper last name\n";
-				std::cin.clear();
-				std::cin.ignore(100, '\n');
-				std::cout << "Enter Last Name:";
-				std::cin >> temp_lname;
-				if (std::cin.fail())
+				catch (std::runtime_error e)
 				{
-					std::cout << "\nReturning to Main Menu. Please use correct inputs next time.\n";
-					std::cin.clear();
-					std::cin.ignore(100, '\n');
-					continue;
+					std::cout << e.what() << "\n";
 				}
 			}
-			std::cout << "Enter Hourly Rate:";
-			std::cin >> temp_hourly_rate;
-			if (std::cin.fail())
-			{
-				std::cout << "\nInvalid Input. Please Input a Number\n";
-				std::cin.clear();
-				std::cin.ignore(100, '\n');
-				std::cout << "Enter Hourly Rate:";
-				std::cin >> temp_hourly_rate;
-				if (std::cin.fail())
-				{
-					std::cout << "\nReturning to Main Menu. Please use correct inputs next time.\n";
-					std::cin.clear();
-					std::cin.ignore(100, '\n');
-					continue;
-				}
-			}
-			std::cout << "Enter Hours Worked:";
-			std::cin >> temp_hours;
-			if (std::cin.fail())
-			{
-				std::cout << "\nInvalid Input. Please Input a Positive Integer\n";
-				std::cin.clear();
-				std::cin.ignore(100, '\n');
-				std::cout << "Enter Hourly Rate:";
-				std::cin >> temp_hours;
-				if (std::cin.fail())
-				{
-					std::cout << "\nReturning to Main Menu. Please use correct inputs next time.\n";
-					std::cin.clear();
-					std::cin.ignore(100, '\n');
-					continue;
-				}
-			}
-
-			std::cout << "\nThanks for the Input\n";	// This is a nice touch, but was really added to prevent a bug in the Hours Worked misinput handling
-
-			// Create a Person
-			example::Person temp_person(temp_id, temp_fname, temp_lname);
-			temp_person.set_hourly_rate(temp_hourly_rate);
-			temp_person.set_hours_worked(temp_hours);
-
-			// Add Person to Database
-			PD.add_person(temp_person);
-
-			std::cout << "\nPerson added\n\n";
-		}
-
-		// Removes a Person
-		if (option == 2)
-		{
-			unsigned int temp_id;
-
-			// Get user inputted ID and check for misinput
-			std::cout << "\nEnter ID Number:";
-			std::cin >> temp_id;
-			std::cout << "\nInvalid Input. Please Input a Positive Integer\n";
-			if (std::cin.fail())
-			{
-				std::cin.clear();
-				std::cin.ignore(100, '\n');
-				std::cout << "Enter ID Number:";
-				std::cin >> temp_id;
-				if (std::cin.fail())
-				{
-					std::cout << "\nReturning to Main Menu. Please use correct inputs next time.\n";
-					std::cin.clear();
-					std::cin.ignore(100, '\n');
-					continue;
-				}
-			}
-
-			//Remove Person from Database
-			PD.remove_person(temp_id);
-
-			std::cout << "\nPerson Removed\n\n";
-		}
-
-		if (option == 3)
-		{
-			std::string temp_string;
-
-			// Call the to_string function into a temp_string
-			temp_string = PD.to_string();
-
-			// Output the temp_string to the screen
-			std::cout << "\n";
-			std::cout << temp_string;
-		}
-
-		if (option == 4)
-		{
-			// break out of while loop and quit
+			break;
+		case 2:
+			// Remove Person
+			temp_id = input_uint("\tEnter ID: ", "Invalid Integer");
+			if (PD.remove_person(temp_id))
+				std::cout << "\tPerson with ID#" << temp_id << "successfully removed\n";
+			else
+				std::cout << "\tCould not find Person with ID#" << temp_id << "\n";
+			break;
+		case 3:
+			// Generate Report
+			std::cout << PD.to_string() << "\n";
 			break;
 		}
 	}
-	return 0;
+
+	// Note that we don't have to do anything special to trigger the destructor -- when
+	// PD goes out of scope, the destructor will be called for us.
 }

@@ -11,13 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\examples\person.cpp" />
-    <ClCompile Include="..\..\src\lab01\person_database.cpp" />
+    <ClCompile Include="..\..\src\example\person.cpp" />
+    <ClCompile Include="..\..\src\example\person_database.cpp" />
     <ClCompile Include="..\..\src\lab01_main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\examples\person.h" />
-    <ClInclude Include="..\..\include\person_database.h" />
+    <ClInclude Include="..\..\include\example\person.h" />
+    <ClInclude Include="..\..\include\example\person_database.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -63,7 +63,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\include\;..\..\include\examples\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\;..\..\include\example\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
