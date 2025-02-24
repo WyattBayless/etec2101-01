@@ -1,97 +1,113 @@
-
 #include <iostream>
-#include <fstream>
 #include <array_list.h>
+#include <iomanip>
+#include <person.h>
 
-// Running short on time so, once again, I don't have doxygen. I'll be sure to add it, it may even be in github by the time you look
-// Also, the test may be missing a few things like testing a few very specific cases within functions, different data types
-// All those should work though I just don't have them explicitly added
 
-int main()
+int main(int argc, char** argv)
 {
-	ssuds::ArrayList<int> ilist;
-	// Test 1: checking capacity before adding items
-	std::cout << "capacity before adding 5 items=" << ilist.capacity() << "\n" << std::endl;
-	ilist.append(42);
-	ilist.append(43);
-	ilist.append(44);
-	ilist.prepend(41);
-	ilist.prepend(40);
+    // The basic test program (for floats)
+    ssuds::ArrayList<float> float_list;
+    
+    std::cout << "test1 (basics):\n=====\n";                        // test1 (basics):                       
+    float_list.append(2.3f);                                        // ======
+    float_list.append(2.6f);
+    std::cout << "\tsize=" << float_list.size() << std::endl;       //     size=2
+    std::cout << "\titem0=" << float_list.at(0) << std::endl;       //     item0=2.3
+    std::cout << "\titem1=" << float_list.at(1) << std::endl;       //     item1=2.6
+    float_list.at(0) -= 0.1f;
+    float_list.at(1)++;
+    std::cout << "\titem0=" << float_list.at(0) << std::endl;       //     item0=2.2
+    std::cout << "\titem1=" << float_list.at(1) << std::endl;       //     item1=3.6
 
-	// Test 2: Check if append and prepend work properly
-	std::cout << "Checking to see if prepend and append put items in correct places\n\n";
-	for (int i = 0; i < ilist.size(); i++)
-		std::cout << "ilist[" << i << "] = " << ilist.at(i) << "\n";
+    std::cout << "\ntest2 (insert):\n=====\n";                      // test2 (insert):  
+    float_list.insert(1.8f, 0);                                     // ======
+    float_list.insert(4.2f, 3);                                     //     item0=1.8 
+    float_list.insert(2.2f, 1);                                     //     item1=2.2
+    for (unsigned int i = 0; i < float_list.size(); i++)            //     item2=2.2   
+        std::cout << "\titem" << i << "=" << float_list.at(i) << "\n"; //     item3=3.6
+                                                                    //     item4=4.2
 
-	// [40, 41, 42, 43, 44]
-	ilist.append(40);
-	ilist.append(43);
-	ilist.append(99);
-	ilist.append(43);
-	ilist.append(98);
-	// [40, 41, 42, 43, 44, 40, 43, 99, 43, 98]
 
-	// Test 3: seeing if array size returns correctly
-	// Outputting number of items in array to screen
-	std::cout << "\nsize=" << ilist.size() << "\n" << std::endl;
+    std::cout << "\ntest3 (grow):\n=====\n";                        // test3 (grow):
+                                                                    // ======
+    std::cout << "\tsize=" << float_list.size() << "\n";            //     size=5
+    std::cout << "\tcapacity=" << float_list.capacity() << "\n";    //     capacity=5
+    float_list.append(5.6f);   // <= a capacity increase should be triggered here
+    float_list.append(2.2f);
+    std::cout << "\tsize=" << float_list.size() << "\n";            //     size=7
+    std::cout << "\tcapacity=" << float_list.capacity() << "\n";    //     capacity=10
+                                            
+    for (unsigned int i = 0; i < float_list.size(); i++)            //     item0=1.8              
+        std::cout << "\titem" << i << "=" << float_list.at(i) << "\n"; //     item1=2.2   
+                                                                    //     item2=2.2
+                                                                    //     item3=3.6
+                                                                    //     item4=4.2
+                                                                    //     item5=5.6
+                                                                    //     item6=2.2
+    
 
-	// Test 4: checking capacity after adding some items
-	std::cout << "capacity after adding more than 5 items=" << ilist.capacity() << "\n" << std::endl;
+    std::cout << "\ntest4 (stream):\n=====\n";                      // test4 (stream):
+                                                                    // ======
+    std::cout << "\t";
+    float_list.output(std::cout);
+    std::cout << std::endl;                                         //     [1.8, 2.2, 2.2, 3.6, 4.2, 5.6, 2.2]
 
-	// Test 5: checking find function
-	// Outputting first index where 43 is found after given start index. Return -1 if not found
-	std::cout << "First index containing 43, starting at 0= " << ilist.find(43) << std::endl;					// Starts at 0. Should return 3
-	std::cout << "First index containing 43, starting at 4= " << ilist.find(43, 4) << std::endl;					// Starts at 4. Should return 6
-	std::cout << "First index containing 43, starting at 7= " << ilist.find(43, 7) << std::endl;					// Starts at 7. Should return 8
-	std::cout << "First index containing 43, starting at 9= " << ilist.find(43, 9) << std::endl;					// Starts at 9. Should return -1
-	std::cout << "First index containing 104, starting at 0= " << ilist.find(104) << "\n" << std::endl;			// Starts at 0, looks for 104. Should return -1
 
-	// Test 6: checking output function by outputting to screen and as a bonus reassures second round of appending worked properly
-	// Outputting full array to screen
-	std::cout << "Output of ilist: ";
-	ilist.output(std::cout);			// [40, 41, 42, 43, 44, 40, 43, 99, 43, 98]
-	std::cout << "\n";
 
-	// Test 7: checking insert function by changing an element in array
-	// Should now be [40, 41, 42, 43, 44, 45, 40, 43, 99, 43, 98]
-	ilist.insert(45,5);
-	std::cout << "\n45 inserted\n";
-	std::cout << "\nOutput of ilist: ";
-	ilist.output(std::cout);
+    std::cout << "\ntest5 (find all):\n=====\n";                    // test5 (find all):
+    int index = float_list.find(2.2f, 0);                           // =====
+    while (index != -1)                                             //     Found occurrence of 2.2 at index 1
+    {                                                               //     Found occurrence of 2.2 at index 2
+        std::cout << "\tFound occurrence of 2.2 at index " << index << "\n"; 
+        index++;            // Look at the next spot (or later)
+        if (index == float_list.size())                             //     Found occurrence of 2.2 at index 6
+            break;
+        index = float_list.find(2.2f, index);
+    }
 
-	// Test 8: testing output function by outputting to file
-	std::ofstream fout("..\\..\\media\\test.txt");
-	ilist.output(fout);
+    std::cout << "\ntest6 (remove_all [and remove]):\n=====\n";     // test6 (remove_all [and remove])
+                                                                    // =====
+    std::cout << "\tsize=" << float_list.size() << "\n";            //     size=7
+    std::cout << "\tcapacity=" << float_list.capacity() << "\n";    //     capacity=10
+    std::cout << "\tremoved " << float_list.remove_all(2.2f);                   // <= a capacity decrease should be triggered here
+    std::cout << " items\n";                                        //     removed 3 items
+    std::cout << "\t"; float_list.output(std::cout); std::cout << "\n"; //     [1.8, 3.6, 4.2, 5.6]
+    std::cout << "\tsize=" << float_list.size() << "\n";            //     size=4
+    std::cout << "\tcapacity=" << float_list.capacity() << "\n";    //     capacity=5
+    
+    
+    std::cout << "\ntest 7 (reserve and Person's):\n=====\n";       // test7 (reserve and Person's)
+    ssuds::ArrayList<example::Person> plist;                        // =====
+    std::cout << "\tplist size=" << plist.size() << "\n";           //     plist size=0
+    std::cout << "\tplist capacity=" << plist.capacity() << "\n";   //     plist capacity=5
+    char temp_string[4] = { 0, 0, 0, 0 };
+    plist.reserve(26);
+    std::cout << "\tplist size=" << plist.size() << "\n";           //     plist size=0
+    std::cout << "\tplist capacity=" << plist.capacity() << "\n";   //     plist capacity=26
+    for (unsigned int i = 0; i < 26; i++)
+    {
+        temp_string[0] = 'A' + i;
+        temp_string[1] = temp_string[2] = 'a' + i;
+        example::Person p(std::string(temp_string), "Smith", 100 + i, i + 0.5f);
+        plist.append(p);
+        plist.at(plist.size() - 1).set_hours_worked(i * 2);
+    }
+    plist.insert(example::Person("---", "###", 5000, 0.0f), 1);
+    std::cout << "\tplist size=" << plist.size() << "\n";           //     plist size=26
+    std::cout << "\tplist capacity=" << plist.capacity() << "\n";   //     plist capacity=26
+    std::cout << std::setprecision(2) << std::fixed;
+    for (unsigned int i = 0; i < plist.size(); i++)                 //     Aaa Smith $0.00
+    {                                                               //     --- ### $0.00
+        example::Person p = plist.at(i);                            //     Bbb Smith $3.00
+        std::cout << "\t" << p.get_name(false) << " ";              //     Ccc Smith $10.00
+        std::cout << " $" << p.get_salary() << "\n";                //     Ddd Smith $21.00 
+    }                                                               //     Eee Smith $36.00      
+                                                                    //     (more)
+                                                                    //     Zzz Smith $1275.00
 
-	// Test 9: testing remove function by removing newly added element
-	// Should now be [40, 41, 42, 43, 44, 40, 43, 99, 43, 98]
-	ilist.remove(5);
-	std::cout << "\n\n45 removed\n";
-	std::cout << "\nOutput of ilist: ";
-	ilist.output(std::cout);
+#
+    return 0;
+} 
 
-	// Test 10: testing remove all function by removing all occurrences of 43
-	// Should now be [40, 41, 42, 44, 40, 99, 98]
-	std::cout << "\n\nAll 43's removed\n";
-	std::cout << "Amount removed:" << ilist.remove_all(43) << std::endl;
-	std::cout << "\nOutput of ilist: ";
-	ilist.output(std::cout);
 
-	// Test 11: removing more items to test capacity shrink
-	ilist.remove(6);
-	ilist.remove(5);
-	ilist.remove(4);
-	ilist.remove(3);
-	ilist.remove(2);
-	ilist.remove(1);
-
-	std::cout << "\n\nAll but 1 item removed\n";
-	std::cout << "\nOutput of ilist: ";
-	ilist.output(std::cout);
-	std::cout << "\n\ncapacity after removing enough to shrink=" << ilist.capacity() << std::endl;
-
-	// Test 12: testing at function and out_of_range. Uncomment lines below to trigger error
-	//std::cout << "\nItem at index 1:" << ilist.at(1) << std::endl;			// Index 1 currently has nothing, should trigger out_of_range
-	//std::cout << "\nItem at index -1:" << ilist.at(-1) << std::endl;			// Index cannot be negative, should trigger out_of_range
-	std::cout << "\nItem at index 0: " << ilist.at(0) << std::endl;
-}
