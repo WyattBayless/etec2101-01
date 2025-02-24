@@ -2,6 +2,8 @@
 #include <string>
 #include <stdexcept>
 #include <ostream>
+#include <iostream>  // just in case
+#include <initializer_list>
 
 // Note: in C++, a general tempate (like this one) must be defined inline
 // entirely in the .h file (no .cpp files).  
@@ -52,6 +54,22 @@ namespace ssuds
 			// would be redundance, so I'm commenting this line.
 			// if (mData)
 			delete[] mData;
+		}
+
+
+
+		// New initializer-list constructor
+		ArrayList(const std::initializer_list<T>& starting_values)
+		{
+			// Set up attributes
+
+			// Use an iterator or for each to access values in starting_values
+
+			for (T& cur_value : starting_values)
+			{
+				// add cur_value to our array.
+				starting_values.append(cur_value);
+			}
 		}
 
 
@@ -278,6 +296,37 @@ namespace ssuds
 			return mSize;
 		}
 
+		ArrayList& operator=(const ArrayList& other_al)
+		{
+			// We want a DEEP copy here (make us have a distinct array, but with the same
+			// values as other_al)
+			// 1. Free up our array
+			// 2. Make a new array (at least big enough to hold other_al.size())
+			// 3. Copy data from other_al to that new_array.
+			// 4. Make sure size and capacity attributes are correct.
+			// 5. Return a reference to ME (to support chain assignments like a = b = c)
+
+			delete[] mData;
+
+
+
+			return *this;      // De-reference the this pointer to get a reference
+		}
+
+		T& operator[](unsigned int index)
+		{
+			return mData[index];
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const ArrayList& A)
+		{
+			// Here, we're defining the << operator for ArrayList's using Method3 of operator
+			// overloading.  Just call our output method to do the hard word
+			A.output(os);
+			return os;
+		}
+
+
 		class ArrayListIterator        // iterator might be another name-choice.
 		{
 		private:
@@ -289,7 +338,7 @@ namespace ssuds
 			// be changed, a pointer is more flexible but also more dangerous
 			ArrayList* my_list;
 
-			int index;
+			int my_position;
 
 
 		public:
@@ -300,7 +349,7 @@ namespace ssuds
 				my_position = 0;
 			}
 
-			ArrayListIterator(ArrayList* owning_list, int starting_index)
+			ArrayListIterator(ArrayList* owning_list, int starting_index, bool at_right)
 			{
 				// Done
 				my_list = owning_list;
@@ -312,7 +361,7 @@ namespace ssuds
 			{
 				// Get the current value and return
 				// ArrayList we're iterating through
-				return my_array_list->at(index);
+				return my_list->at(my_position);
 			}
 
 
@@ -320,22 +369,75 @@ namespace ssuds
 			{
 				// Advance ourself, making us look "null/end"-like if we just went
 				// past the end of the attached ArrayList
-				my_position++;
+				if (at_right == false)
+				{
+					my_position++;
 
-				// Now, if we went past the end of the ArrayList (my_list->size() is helpful!),
-				// make myself look like a "null"-like iterator.
+					// Now, if we went past the end of the ArrayList (my_list->size() is helpful!),
+					// make myself look like a "null"-like iterator.
+					if (my_position > my_list->size())
+					{
+
+					}
+				}
+				else if (at_right == true)
+				{
+					my_position--;
+
+					// Now, if we went past the end of the ArrayList (my_list->size() is helpful!),
+					// make myself look like a "null"-like iterator.
+					if (my_position < 0)
+					{
+
+					}
+				}
+			}
+
+			ArrayListIterator operator++(int not_used)
+			{
+				if (at_right == false)
+				{
+					my_position++;
+
+					// Now, if we went past the end of the ArrayList (my_list->size() is helpful!),
+					// make myself look like a "null"-like iterator.
+					if (my_position > my_list->size())
+					{
+
+					}
+				}
+				else if (at_right == true)
+				{
+					my_position--;
+
+					// Now, if we went past the end of the ArrayList (my_list->size() is helpful!),
+					// make myself look like a "null"-like iterator.
+					if (my_position < 0)
+					{
+
+					}
+				}
+			}
+
+			ArrayListIterator operator+(int offset)
+			{
+				my_position += offset;
 			}
 
 
 			bool operator!=(const ArrayListIterator& other)
 			{
 				// We're the iterator on the left, the iterator on the right of the != is passed to us
+
 			}
 		};
 
 
 		ArrayListIterator begin()
 		{
+			// Tells whether we are starting from left or right
+			at_right = false;
+
 			// Our job: construct an Iterator value and return it.
 			// this is a pointer to the instance of ArrayList that called this method 
 			//    (like self in Python)
@@ -346,13 +448,30 @@ namespace ssuds
 
 		ArrayListIterator end()
 		{
+			// Tells whether we are starting from left or right
+			at_right = false;
+
 			// Our job: construct an null-like Iterator value and return it.
 
 			// Despite the name, this does NOT make an iterator that refers to the LAST value
 			// -- it's a special "null-like" value that you decide on
-			ArrayListIterator temp(? ? ? );
-			return temp;
+			ArrayListIterator return_value;
+			return return_value;
 
+		}
+
+		ArrayListIterator rbegin()
+		{
+			// Tells whether we are starting from left or right
+			at_right = true;
+
+
+		}
+
+		ArrayListIterator rend() 
+		{
+			// Tells whether we are starting from left or right
+			at_right = true;
 		}
 		
 
