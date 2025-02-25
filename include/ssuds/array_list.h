@@ -31,6 +31,11 @@ namespace ssuds
 		/// but I'm attempting to use raw bytes here so we don't have to have a default constructor
 		/// for templated types.
 		unsigned char* mData;
+
+		unsigned int cSize;
+		unsigned int cCapacity;
+
+		bool at_right;
 	
 
 
@@ -65,11 +70,37 @@ namespace ssuds
 
 			// Use an iterator or for each to access values in starting_values
 
-			for (T& cur_value : starting_values)
+			for (const T& cur_value : starting_values)
 			{
 				// add cur_value to our array.
-				starting_values.append(cur_value);
+				append(cur_value);
 			}
+		}
+
+		// New COPY-CONSTRUCTOR
+		ArrayList(const ArrayList& other_al)
+		{
+			// Very similar to =operator, but no need to free up data.
+			unsigned char* copy_array = nullptr;
+
+			// We (in this class) want to make US a deep copy of other.
+			copy_array = new unsigned char[other_al.size() * sizeof(T)];
+			memset(copy_array, 0, other_al.size() * sizeof(T));
+			memcpy(copy_array, other_al, sizeof(T) * other_al.size());
+			cSize = other_al.size();
+			cCapacity = other_al.capacity();
+		}
+
+		// New MOVE_CONSTRUCTOR
+		ArrayList(ArrayList&& other_al)
+		{
+			// Make the shallow copy, transfer other's pointer data to us
+			mData = other_al.mData;
+			mSize = other_al.mSize;
+			mCapacity = other_al.mCapacity;
+
+			// now kill the other
+			other_al.mData = nullptr;
 		}
 
 
@@ -158,7 +189,19 @@ namespace ssuds
 			return -1;
 		}
 
-	
+		int find(const T& val) const
+		{
+			ArrayListIterator finder = mData.begin();
+			while (finder != mData.end())
+			{
+				int cur_val = *finder;
+				if (cur_val == val)
+				{
+					return cur_val;
+				}
+				++finder;
+			}
+		}
 
 		/// <summary>
 		/// Inserts a new data item at a given index
@@ -231,6 +274,22 @@ namespace ssuds
 			return result;
 		}
 
+		T remove(const T& val)
+		{
+			ArrayListIterator finder = mData.begin();
+			unsigned int index = 0;
+			while (finder != mData.end())
+			{
+				int cur_val = *finder;
+				if (cur_val == val)
+				{
+					remove(index);
+				}
+				++finder;
+				++index;
+			}
+		}
+
 		/// <summary>
 		/// Removes all occurrences of a given value.  Uses find and remove internally to do the removal
 		/// </summary>
@@ -296,6 +355,7 @@ namespace ssuds
 			return mSize;
 		}
 
+		// = Operator method
 		ArrayList& operator=(const ArrayList& other_al)
 		{
 			// We want a DEEP copy here (make us have a distinct array, but with the same
@@ -305,19 +365,25 @@ namespace ssuds
 			// 3. Copy data from other_al to that new_array.
 			// 4. Make sure size and capacity attributes are correct.
 			// 5. Return a reference to ME (to support chain assignments like a = b = c)
+			unsigned char* new_array = nullptr;
 
 			delete[] mData;
-
-
+			new_array = new unsigned char[other_al.size() * sizeof(T)];
+			memset(new_array, 0, other_al.size() * sizeof(T));
+			memcpy(new_array, other_al, sizeof(T) * other_al.size());
+			mSize = other_al.size();
+			mCapacity = other_al.capacity();
 
 			return *this;      // De-reference the this pointer to get a reference
 		}
 
-		T& operator[](unsigned int index)
+		// [] Operator method
+		unsigned char& operator[](unsigned int index)
 		{
 			return mData[index];
 		}
 
+		// Output using <<
 		friend std::ostream& operator<<(std::ostream& os, const ArrayList& A)
 		{
 			// Here, we're defining the << operator for ArrayList's using Method3 of operator
@@ -326,7 +392,6 @@ namespace ssuds
 			return os;
 		}
 
-
 		class ArrayListIterator        // iterator might be another name-choice.
 		{
 		private:
@@ -334,11 +399,14 @@ namespace ssuds
 			// Don't EVER make a copy of any data -- always refer to the contained
 			// ArrayList.  It should be able to "point" to a current item.
 
+
 			// Most important: a reference or pointer to the ArrayList.  A reference can't
 			// be changed, a pointer is more flexible but also more dangerous
 			ArrayList* my_list;
 
 			int my_position;
+
+			bool on_right;
 
 
 		public:
@@ -354,6 +422,7 @@ namespace ssuds
 				// Done
 				my_list = owning_list;
 				my_position = starting_index;
+				on_right = at_right;
 			}
 
 
@@ -369,7 +438,7 @@ namespace ssuds
 			{
 				// Advance ourself, making us look "null/end"-like if we just went
 				// past the end of the attached ArrayList
-				if (at_right == false)
+				if (on_right == false)
 				{
 					my_position++;
 
@@ -377,10 +446,10 @@ namespace ssuds
 					// make myself look like a "null"-like iterator.
 					if (my_position > my_list->size())
 					{
-
+						my_list = NULL;
 					}
 				}
-				else if (at_right == true)
+				else if (on_right == true)
 				{
 					my_position--;
 
@@ -388,14 +457,16 @@ namespace ssuds
 					// make myself look like a "null"-like iterator.
 					if (my_position < 0)
 					{
-
+						my_list = NULL;
 					}
 				}
+
+				return my_position;
 			}
 
 			ArrayListIterator operator++(int not_used)
 			{
-				if (at_right == false)
+				if (on_right == false)
 				{
 					my_position++;
 
@@ -403,32 +474,56 @@ namespace ssuds
 					// make myself look like a "null"-like iterator.
 					if (my_position > my_list->size())
 					{
-
+						my_list = NULL;
 					}
 				}
-				else if (at_right == true)
+				else if (on_right == true)
 				{
 					my_position--;
 
-					// Now, if we went past the end of the ArrayList (my_list->size() is helpful!),
+					// Now, if we went past the end of the ArrayList,
 					// make myself look like a "null"-like iterator.
 					if (my_position < 0)
 					{
-
+						my_list = NULL;
 					}
 				}
+
+				return my_position;
 			}
 
 			ArrayListIterator operator+(int offset)
 			{
 				my_position += offset;
+
+				if (my_position < 0)
+				{
+					my_list = NULL;
+				}
+
+				if (my_position > my_list->size())
+				{
+					my_list = NULL;
+				}
+
+				return my_position;
 			}
 
 
-			bool operator!=(const ArrayListIterator& other)
+			bool operator!=(const ArrayListIterator& other_al)
 			{
 				// We're the iterator on the left, the iterator on the right of the != is passed to us
 
+				// I think I have this right. I may be massively overthinking, but if lhs does not equal
+				// rhs, then we need to return true for this method
+				if (this->my_list != other_al.my_list)
+				{
+					return true;
+				}
+				if (this->my_list == other_al.my_list)
+				{
+					return false;
+				}
 			}
 		};
 
@@ -436,12 +531,12 @@ namespace ssuds
 		ArrayListIterator begin()
 		{
 			// Tells whether we are starting from left or right
-			at_right = false;
+			//at_right = false;
 
 			// Our job: construct an Iterator value and return it.
 			// this is a pointer to the instance of ArrayList that called this method 
 			//    (like self in Python)
-			ArrayListIterator temp(this, 0);
+			ArrayListIterator temp(this, 0, false);
 			return temp;
 		}
 
@@ -449,13 +544,14 @@ namespace ssuds
 		ArrayListIterator end()
 		{
 			// Tells whether we are starting from left or right
-			at_right = false;
+			//at_right = false;
 
 			// Our job: construct an null-like Iterator value and return it.
 
 			// Despite the name, this does NOT make an iterator that refers to the LAST value
 			// -- it's a special "null-like" value that you decide on
-			ArrayListIterator return_value;
+
+			ArrayListIterator return_value(NULL,mSize,false);
 			return return_value;
 
 		}
@@ -463,15 +559,19 @@ namespace ssuds
 		ArrayListIterator rbegin()
 		{
 			// Tells whether we are starting from left or right
-			at_right = true;
+			//at_right = true;
 
-
+			ArrayListIterator temp(this, mSize - 1, true);
+			return temp;
 		}
 
 		ArrayListIterator rend() 
 		{
 			// Tells whether we are starting from left or right
-			at_right = true;
+			//at_right = true;
+
+			ArrayListIterator return_value(NULL,-1,true);
+			return return_value;
 		}
 		
 

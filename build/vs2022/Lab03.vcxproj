@@ -133,7 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Lab03.cpp" />
+    <ClCompile Include="..\..\src\lab03_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\ssuds\array_list.h" />
