@@ -17,7 +17,7 @@ example::Person::~Person()
 
 
 
-example::Person::Person(std::string starting_fname, std::string starting_lname, unsigned int id, float starting_rate) :
+example::Person::Person(const std::string& starting_fname, const std::string& starting_lname, unsigned int id, float starting_rate) :
 	mFirstName(starting_fname), mLastName(starting_lname), mID(id), mHourlyRate(starting_rate),
 	mHoursWorked(0)
 {

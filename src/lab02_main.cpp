@@ -4,6 +4,7 @@
 #include <person.h>
 
 
+
 int main(int argc, char** argv)
 {
     // The basic test program (for floats)
@@ -89,7 +90,8 @@ int main(int argc, char** argv)
     {
         temp_string[0] = 'A' + i;
         temp_string[1] = temp_string[2] = 'a' + i;
-        example::Person p(std::string(temp_string), "Smith", 100 + i, i + 0.5f);
+        std::string s(temp_string);
+        example::Person p(s, "Smith", 100 + i, i + 0.5f);
         plist.append(p);
         plist.at(plist.size() - 1).set_hours_worked(i * 2);
     }

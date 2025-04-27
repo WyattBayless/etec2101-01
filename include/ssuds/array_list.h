@@ -2,18 +2,218 @@
 #include <string>
 #include <stdexcept>
 #include <ostream>
-#include <iostream>  // just in case
-#include <initializer_list>
 
 // Note: in C++, a general tempate (like this one) must be defined inline
 // entirely in the .h file (no .cpp files).  
-
 namespace ssuds
 {
 	/// An ArrayList is an array-based data structure. 
 	template <class T>
 	class ArrayList
 	{
+		// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+		// @ ENUM CLASSES                           @
+		// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+		enum class ArrayListIteratorType 
+		{ 
+			/// <summary>
+			/// This ArrayList iterator visits items from beginning to end
+			/// </summary>
+			forward, 
+
+			/// <summary>
+			/// This ArrayList iterator visits items from end to beginning
+			/// </summary>
+			backwards 
+		};
+
+		// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+		// @ NESTED CLASSES                         @
+		// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	public:
+		/// <summary>
+		/// The job of ArrayListIterator is to traverse the data in an ArrayList.  ArrayList
+		/// wouldn't necessarily *need* an iterator since the internal array supports random access,
+		/// but this is a chance to get used to the iterator pattern, which is much more useful
+		/// for the user in other classes.  We might eventually use inheritance to derive this class
+		/// from some common iterator class.
+		/// </summary>
+		class ArrayListIterator
+		{
+		protected:
+			/// <summary>
+			/// A pointer to the containing ArrayList
+			/// </summary>
+			const ArrayList* mArrayList;
+
+			/// <summary>
+			/// The current position within the array list.  Anything from 0...ArrayListSize-1 is considered
+			/// "valid", all other values are invalid
+			/// </summary>
+			int mPosition;
+
+
+			/// <summary>
+			/// Which type of iterator are we?
+			/// </summary>
+			ArrayListIteratorType mType;
+
+		public:
+			/// <summary>
+			/// The main constructor
+			/// </summary>
+			/// <param name="arr">The ArrayList we are to traverse</param>
+			/// <param name="tp">What type of traversal to do</param>
+			/// <param name="start_index">The index to start on</param>
+			ArrayListIterator(const ArrayList* arr, ArrayListIteratorType tp, int start_index) : mArrayList(arr), mPosition(start_index), mType(tp)
+			{
+				// intentionally empty
+			}
+
+
+			/// <summary>
+			/// This constructor only really has value if the user makes an iterator (BUT DOES NOT USE!)
+			/// and then later assigns it a real value.  If the user does anything with an iterator
+			/// created like this, bad things will happen...
+			/// </summary>
+			ArrayListIterator() : mArrayList(nullptr), mType(ArrayListIteratorType::forward), mPosition(0)
+			{
+				// intentionally empty
+			}
+
+
+			/// <summary>
+			/// Copy-constructor
+			/// </summary>
+			/// <param name="other"></param>
+			ArrayListIterator(const ArrayListIterator& other) : mArrayList(other.mArrayList), mPosition(other.mPosition),
+				mType(other.mType)
+			{
+				// intentionally empty
+			}
+
+
+			/// <summary>
+			/// Are we equal to the other iterator?  I'm currently not considering the ArrayListIterator type...
+			/// I'm not sure if that's the right call or not.
+			/// </summary>
+			/// <param name="other">The iterator we're comparing ourself to</param>
+			/// <returns>true if we're equal</returns>
+			bool operator==(const ArrayListIterator& other) const
+			{
+				return mArrayList == other.mArrayList && mPosition == other.mPosition;
+			}
+
+			/// <summary>
+			/// Are we not equal to the other iterator?  This is computed by inverting the result of the
+			/// == operator
+			/// </summary>
+			/// <param name="other">The iterator we're comparing ourself to</param>
+			/// <returns>true if we're NOT equal</returns>
+			bool operator!=(const ArrayListIterator& other) const
+			{
+				return !(*this == other);
+			}
+
+
+			/// <summary>
+			/// Increments / advances the iterator (prefix ++x version).  This version of ++ returns
+			/// a copy of the Iterator *after* the ++ is performed.  So if the user did this:
+			/// y = ++x
+			/// X is changed, and a copy is returned which can be assigned to y.
+			/// It is the responsibility of the user to NOT call this if the iterator is 
+			/// invalid (equal to end/rend) -- if they ignore this rule, the results are indeterminate.
+			/// </summary>
+			ArrayListIterator operator++()
+			{
+				if (mType == ArrayListIteratorType::forward)
+					++mPosition;
+				else
+					--mPosition;
+
+				return ArrayListIterator(mArrayList, mType, mPosition);
+			}
+
+
+			/// <summary>
+			/// Increments / advances the iterator (postfix x++ version).  This version of ++ returns
+			/// a copy of the Iterator *before* the ++ is performed.  So if the user did this:
+			/// y = x++
+			/// X is changed, but y will hold the iterator value before the change.  
+			/// It is the responsibility of the user to NOT call this if the iterator is 
+			/// invalid (equal to end/rend) -- if they ignore this rule, the results are indeterminate.
+			/// <param name="not_used">This parameter is not used at all, but the compiler passes us
+			/// a value so we can have both versions of ++</param>
+			/// </summary>
+			ArrayListIterator operator++(int not_used)
+			{
+				ArrayListIterator return_val(mArrayList, mType, mPosition);
+				if (mType == ArrayListIteratorType::forward)
+					++mPosition;
+				else
+					--mPosition;
+				return return_val;
+			}
+
+
+			/// <summary>
+			/// Returns a copy of this iterator that is some amount offset from the current position.
+			/// The resulting index of that iterator is constratined to be within -1...mSize
+			/// </summary>
+			/// <param name="offset">The amount to offset this iterator (positive or negative)</param>
+			/// <returns>A copy of this iterator with the given offset applied</returns>
+			ArrayListIterator operator+(int offset) const
+			{
+				int new_index = mPosition + offset;
+				if (new_index < -1)
+					new_index = -1;
+				if (new_index >= (int)mArrayList->size())
+					new_index = (int)mArrayList->size();
+
+				return ArrayListIterator(mArrayList, mType, new_index);
+			}
+
+
+			/// <summary>
+			/// I don't think std::vector does this, but it is the inverse of the + operator and easy to add
+			/// </summary>
+			/// <param name="offset">The amount to offset this iterator by (inverted)</param>
+			/// <returns>A copy of this iterator with the given offset</returns>
+			ArrayListIterator operator-(int offset) const
+			{
+				return (*this) + (-offset);
+			}
+
+
+			/// <summary>
+			/// Returns a reference to the current item in the ArrayList.  It is important that the
+			/// user only call this method if the iterator is not in an invalid state (defined by being
+			/// equal to end/rend)
+			/// </summary>
+			/// <returns>A reference to the current object</returns>
+			T& operator*()
+			{
+				return (*mArrayList)[mPosition];
+			}
+
+
+			/// <summary>
+			/// Used to copy one ArrayListIterator value to another
+			/// </summary>
+			/// <param name="other">The ArrayListIterator we're copying from</param>
+			/// <returns>A reference to this changed ArrayListIterator</returns>
+			ArrayListIterator& operator=(const ArrayListIterator& other)
+			{
+				mArrayList = other.mArrayList;
+				mPosition = other.mPosition;
+				mType = other.mType;
+				return *this;
+			}
+
+			// I needed access in the remove method.
+			friend class ArrayList;
+		};
+
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	// @ ATTRIBUTES                              @
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -27,27 +227,124 @@ namespace ssuds
 		/// How many slots are we USING?  This will always be less than or equal to mCapacity
 		unsigned int mSize;
 
-		/// The array of data we're currently holding.  Note: an alternative would've been T* mData
-		/// but I'm attempting to use raw bytes here so we don't have to have a default constructor
-		/// for templated types.
-		unsigned char* mData;
+		// This is the "traditional" approach, but does require that we have a default constructor
+		T* mData;
 
-		unsigned int cSize;
-		unsigned int cCapacity;
 
-		bool at_right;
-	
+	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	// @ OPERATOR OVERLOADS                      @
+	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	public:
+
+		/// <summary>
+		/// Overloads the stream operator for ArrayLists.
+		/// </summary>
+		/// <param name="os">an ostream object (ofstream, stringstream, cout, etc.) </param>
+		/// <param name="alist">the ArrayList</param>
+		/// <returns>the (possibly modified) os that was given to us</returns>
+		friend std::ostream& operator <<(std::ostream& os, const ArrayList& alist)
+		{
+			alist.output(os);
+			return os;
+		}
+
+
+		/// <summary>
+		/// Gets the data item at the given index.  This method (unlike at) does NOT
+		/// do bounds-checking (and so is very slightly faster)
+		/// </summary>
+		/// <param name="index">the index of the thing to return</param>
+		/// <returns>a reference to the value at the given index</returns>
+		T& operator[](int index) const
+		{
+			return mData[index];
+		}
+
+
+
+		/// <summary>
+		/// Allows the creation of a deep copy when the user assigns an existing
+		/// ArrayList to another.  This method also handles the case where the user
+		/// self-copies (a = a).
+		/// </summary>
+		/// <param name="other">The other ArrayList we are assigning to</param>
+		/// <returns>a reference to this ArrayList</returns>
+		ArrayList<T>& operator= (const ArrayList<T>& other)
+		{
+			// Save away all data we need from other
+			T* other_data_copy = new T[other.mCapacity];
+			for (unsigned int i = 0; i < other.mSize; i++)
+				other_data_copy[i] = other[i];
+
+			unsigned int other_size = other.size();
+			unsigned int other_capacity = other.capacity();
+
+			// Clear our data.  There is a chance that this and other are the same thing, which
+			// was why it was important to save away the data above before doing this.
+			clear();
+
+			// Now just assign values from the temporaries we saved away
+			mData = other_data_copy;
+			mCapacity = other_capacity;
+			mSize = other_size;
+
+			// Finally return a reference to ourself to support chain-assignments like
+			// b = this_array_list = a;
+			return *this;
+		}
+
 
 
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	// @ CONSTRUCTORS / DESTRUCTORS              @
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	public:
-		/// Default constructor
+		/// <summary>
+		/// The Default constructor
+		/// </summary>
 		ArrayList() : mSize(0), mCapacity(0), mData(nullptr)
 		{
 			// intentionally empty
 		};
+
+
+		/// <summary>
+		/// The copy-constructor.  Used in these two cases
+		/// ArrayList me(other_array_list);
+		/// ArrayList me = other_array_list;    Note: this does NOT use the =operator
+		/// ...
+		/// me = other_array_list;				This WOULD use the =operator
+		/// </summary>
+		/// <param name="other"></param>
+		ArrayList(const ArrayList& other) : mCapacity(other.mCapacity), mSize(other.mSize)
+		{
+			mData = new T[other.mCapacity];
+			for (unsigned int i = 0; i < other.size(); i++)
+				(*this)[i] = other[i];
+		}
+
+		/// <summary>
+		/// The move-constructor.  This makes a shallow copy of other.  A better way to explain
+		/// might be to say that this constructor "steals" the data from the other array.  The compiler
+		/// calls this method when ArrayList other is about to go away, and it is being assigned
+		/// to us.  Making a full copy would be much more expensive than this.
+		/// </summary>
+		/// <param name="other"></param>
+		ArrayList(ArrayList&& other) : mCapacity(other.mCapacity), mSize(other.mSize), mData(other.mData)
+		{
+			other.mData = NULL;
+			other.mCapacity = 0;
+			other.mSize = 0;
+		}
+
+		/// Initializer-list constructor
+		ArrayList(std::initializer_list<T> ilist) : mCapacity((int)ilist.size()), mSize((int)ilist.size())
+		{
+			mData = new T[mCapacity];
+			int i = 0;
+			for (T val : ilist)
+				(*this)[i++] = val;
+		}
 
 
 
@@ -59,48 +356,6 @@ namespace ssuds
 			// would be redundance, so I'm commenting this line.
 			// if (mData)
 			delete[] mData;
-		}
-
-
-
-		// New initializer-list constructor
-		ArrayList(const std::initializer_list<T>& starting_values)
-		{
-			// Set up attributes
-
-			// Use an iterator or for each to access values in starting_values
-
-			for (const T& cur_value : starting_values)
-			{
-				// add cur_value to our array.
-				append(cur_value);
-			}
-		}
-
-		// New COPY-CONSTRUCTOR
-		ArrayList(const ArrayList& other_al)
-		{
-			// Very similar to =operator, but no need to free up data.
-			unsigned char* copy_array = nullptr;
-
-			// We (in this class) want to make US a deep copy of other.
-			copy_array = new unsigned char[other_al.size() * sizeof(T)];
-			memset(copy_array, 0, other_al.size() * sizeof(T));
-			memcpy(copy_array, other_al, sizeof(T) * other_al.size());
-			cSize = other_al.size();
-			cCapacity = other_al.capacity();
-		}
-
-		// New MOVE_CONSTRUCTOR
-		ArrayList(ArrayList&& other_al)
-		{
-			// Make the shallow copy, transfer other's pointer data to us
-			mData = other_al.mData;
-			mSize = other_al.mSize;
-			mCapacity = other_al.mCapacity;
-
-			// now kill the other
-			other_al.mData = nullptr;
 		}
 
 
@@ -117,14 +372,8 @@ namespace ssuds
 			// check to see if we need to increase our capacity
 			grow();
 
-			// Stick our new element in the last slot and (sneakily) increase our size in the process
-			// ... This is what I had originally...
-			//(T&)(mData[mSize * sizeof(T)]) = val;
-			// ... but I switched to this.  Person seemed to be a problem (in particular the strings)
-			//     Memcpy would side-step any = operators.  I'm not 100% sure why this fixed the problem
-			memcpy(&mData[mSize * sizeof(T)], &val, sizeof(T));
-			//T temp = (T&)(mData[mSize * sizeof(T)]);     // <- seeing if I could read out what i put in just now
-			mSize++;
+			// Put the data in the last spot (and sneakily increase the size!)
+			mData[mSize++] = val;
 		}
 
 
@@ -141,7 +390,18 @@ namespace ssuds
 		{
 			if (index >= mSize)
 				throw std::out_of_range("Invalid index (" + std::to_string(index) + ")");
-			return (T&)(mData[index * sizeof(T)]);
+			return mData[index];
+		}
+
+
+		/// <summary>
+		/// Returns an forward ArrayListIterator "pointing" at the first element (if it exists).  If the
+		/// ArrayListIterator is empty, this iterator will be equal to end.
+		/// </summary>
+		/// <returns>A forward iterator referring to the first value value</returns>
+		ArrayListIterator begin() const
+		{
+			return ArrayListIterator(this, ArrayListIteratorType::forward, 0);
 		}
 
 
@@ -167,6 +427,19 @@ namespace ssuds
 			mCapacity = 0;
 		}
 
+
+		/// <summary>
+		/// The name can be a bit mis-leading, but this iterator does NOT return an iterator referring
+		/// to the LAST element.  Instead, it returns a special value that indicates this is an invalid
+		/// iterator (or we're done forward-traversing)
+		/// </summary>
+		/// <returns>An "end" type iterator value</returns>
+		ArrayListIterator end() const
+		{
+			return ArrayListIterator(this, ArrayListIteratorType::forward, mSize);
+		}
+
+
 		/// <summary>
 		/// Finds the index of the first occurrence of the given value
 		/// </summary>
@@ -176,7 +449,7 @@ namespace ssuds
 		int find(const T& val, const unsigned int start_index = 0) const
 		{
 			if (start_index >= mSize)
-				throw std::out_of_range("Invalid index: " + std::to_string(start_index));
+				return -1;
 
 			for (unsigned int i = start_index; i < mSize; i++)
 			{
@@ -189,19 +462,43 @@ namespace ssuds
 			return -1;
 		}
 
-		int find(const T& val) const
+
+		/// <summary>
+		/// Like the find method above, but using iterators (closer to std::vector)
+		/// </summary>
+		/// <param name="val">The value to search for</param>
+		/// <param name="start">Either begin, rbegin, or some other iterator to initialize the search</param>
+		/// <returns>And end iterator or rend/end iterator value if not found</returns>
+		ArrayListIterator find(const T& val, const ArrayListIterator& start) const
 		{
-			ArrayListIterator finder = mData.begin();
-			while (finder != mData.end())
+			if (start.mArrayList != this)
+				throw std::runtime_error("iterator must be based on this ArrayList");
+
+			// Make a copy of the ArrayListIterator we were given and one to hold the end iterator value
+			ArrayListIterator temp = start;
+			ArrayListIterator ender;
+
+			// Properly assign the ender-man
+			if (start.mType == ArrayListIteratorType::forward)
+				ender = end();
+			else
+				ender = rend();
+
+			// Now, continue until we reach the end or one of the values
+			while (temp != ender)
 			{
-				int cur_val = *finder;
-				if (cur_val == val)
-				{
-					return cur_val;
-				}
-				++finder;
+				if (*temp == val)
+					return temp;
+				else
+					++temp;
 			}
+
+			return temp;
 		}
+
+
+
+	
 
 		/// <summary>
 		/// Inserts a new data item at a given index
@@ -219,32 +516,73 @@ namespace ssuds
 				// check to see if we need to increase capacity first
 				grow();
 
-				// Move all the elements that come *after* index up one spot
-				memcpy(&mData[sizeof(T) * (index + 1)], &mData[index * sizeof(T)], (mSize - index) * sizeof(T));
-
+				// Move all elements at or after the given index down one spot
+				for (unsigned int i = mSize; i > index; i--)
+					mData[i] = mData[i - 1];
 				// Put our new elements in spot index and increase our size
-				//(T&)(mData[index * sizeof(T)]) = val;
-				memcpy(&mData[index * sizeof(T)], &val, sizeof(T));
+				mData[index] = val;
 				mSize++;
 			}
 		}
 
 
+
 		/// <summary>
-		/// Outputs the ArrayList to the given output stream
+		/// This basically does the same thing as the << operator (the syntax is a bit different).  I 
+		/// chose to keep it to preserve backwards compatiability with <Lab3 code.
 		/// </summary>
-		/// <param name="os">an ostream object (ofstream, stringstream, cout, etc.) </param>
+		/// <param name="os">The output stream (cout, fp, stringstring, etc.) to write to</param>
 		void output(std::ostream& os) const
 		{
 			os << "[";
-			for (unsigned int i = 0; i < size(); i++)
+			for (unsigned int i = 0; i < mSize; i++)
 			{
-				os << at(i);
-				if (i < size() - 1)
+				os << (*this)[i];
+				if (i < mSize - 1)
 					os << ", ";
 			}
 			os << "]";
 		}
+
+
+
+		void prepend(const T& val)
+		{
+			// check to see if we need to increase our capacity
+			grow();
+
+
+			// Move the items "down" one index to make room
+			for (unsigned int i = mSize; i > 0; i--)
+				mData[i] = mData[i - 1];
+
+			// Put the new item into the first spot
+			mData[0] = val;
+			mSize++;
+		}
+
+
+
+		/// <summary>
+		/// Returns a backwards ArrayListIterator "pointing" at the last element (if it exists).  If the
+		/// ArrayListIterator is empty, this iterator will be equal to rend.
+		/// </summary>
+		/// <returns>A backwards iterator referring to the last valid value</returns>
+		ArrayListIterator rbegin() const
+		{
+			return ArrayListIterator(this, ArrayListIteratorType::backwards, mSize - 1);
+		}
+
+
+		/// <summary>
+		/// Returns a special value indicating we're done iterating backwards or that this iterator is invalid
+		/// </summary>
+		/// <returns>A special end value for backwards iteration</returns>
+		ArrayListIterator rend() const
+		{
+			return ArrayListIterator(this, ArrayListIteratorType::backwards, -1);
+		}
+
 
 		/// <summary>
 		/// Removes a data item at the given index
@@ -258,10 +596,11 @@ namespace ssuds
 				throw std::out_of_range("Invalid index: " + std::to_string(index));
 
 			// Get the value we'll return at the end (the element removed)
-			T result = (T&)(mData[index * sizeof(T)]);
+			T result = mData[index];
 
 			// Move all elements that come after index down one spot
-			memcpy(&mData[index * sizeof(T)], &mData[(index + 1) * sizeof(T)], (mSize - index - 1) * sizeof(T));
+			for (unsigned int i = index; i < mSize - 1; i++)
+				mData[i] = mData[i + 1];
 
 			// Decrement our size
 			mSize--;
@@ -274,21 +613,27 @@ namespace ssuds
 			return result;
 		}
 
-		T remove(const T& val)
+
+		/// <summary>
+		/// Removes the value at the given position
+		/// </summary>
+		/// <param name="it">A valid iterator referring to the value that the user wants to remove</param>
+		/// <returns>An iterator now referring to the value *after* the value removed (or end/rend if there's
+		/// nothing after)</returns>
+		ArrayListIterator remove(const ArrayListIterator& it)
 		{
-			ArrayListIterator finder = mData.begin();
-			unsigned int index = 0;
-			while (finder != mData.end())
+			if (it.mArrayList != this || it.mPosition < 0 || it.mPosition > (int)mSize)
+				throw std::out_of_range("Invalid iterator state");
+			
+			remove(it.mPosition);
+			if (it.mType == ArrayListIteratorType::forward)
+				return it;
+			else
 			{
-				int cur_val = *finder;
-				if (cur_val == val)
-				{
-					remove(index);
-				}
-				++finder;
-				++index;
+				return it - 1;
 			}
 		}
+
 
 		/// <summary>
 		/// Removes all occurrences of a given value.  Uses find and remove internally to do the removal
@@ -331,11 +676,11 @@ namespace ssuds
 			if (desired_capacity > mCapacity)
 			{
 				// Make the larger array
-				unsigned char* temp_array = new unsigned char[desired_capacity * sizeof(T)];
-				memset(temp_array, 0, sizeof(T) * desired_capacity);
+				T* temp_array = new T[desired_capacity];
 
 				// Copy data from the existing array
-				memcpy(temp_array, mData, mSize * sizeof(T));
+				for (unsigned int i = 0; i < mSize; i++)
+					temp_array[i] = mData[i];
 
 				// Free the old array
 				delete[] mData;
@@ -355,226 +700,6 @@ namespace ssuds
 			return mSize;
 		}
 
-		// = Operator method
-		ArrayList& operator=(const ArrayList& other_al)
-		{
-			// We want a DEEP copy here (make us have a distinct array, but with the same
-			// values as other_al)
-			// 1. Free up our array
-			// 2. Make a new array (at least big enough to hold other_al.size())
-			// 3. Copy data from other_al to that new_array.
-			// 4. Make sure size and capacity attributes are correct.
-			// 5. Return a reference to ME (to support chain assignments like a = b = c)
-			unsigned char* new_array = nullptr;
-
-			delete[] mData;
-			new_array = new unsigned char[other_al.size() * sizeof(T)];
-			memset(new_array, 0, other_al.size() * sizeof(T));
-			memcpy(new_array, other_al, sizeof(T) * other_al.size());
-			mSize = other_al.size();
-			mCapacity = other_al.capacity();
-
-			return *this;      // De-reference the this pointer to get a reference
-		}
-
-		// [] Operator method
-		unsigned char& operator[](unsigned int index)
-		{
-			return mData[index];
-		}
-
-		// Output using <<
-		friend std::ostream& operator<<(std::ostream& os, const ArrayList& A)
-		{
-			// Here, we're defining the << operator for ArrayList's using Method3 of operator
-			// overloading.  Just call our output method to do the hard word
-			A.output(os);
-			return os;
-		}
-
-		class ArrayListIterator        // iterator might be another name-choice.
-		{
-		private:
-			// ATTRIBUTES?  ALL iterators should be very light-weight, throw-away.
-			// Don't EVER make a copy of any data -- always refer to the contained
-			// ArrayList.  It should be able to "point" to a current item.
-
-
-			// Most important: a reference or pointer to the ArrayList.  A reference can't
-			// be changed, a pointer is more flexible but also more dangerous
-			ArrayList* my_list;
-
-			int my_position;
-
-			bool on_right;
-
-
-		public:
-			ArrayListIterator()
-			{
-				// Done
-				my_list = nullptr;
-				my_position = 0;
-			}
-
-			ArrayListIterator(ArrayList* owning_list, int starting_index, bool at_right)
-			{
-				// Done
-				my_list = owning_list;
-				my_position = starting_index;
-				on_right = at_right;
-			}
-
-
-			T& operator*()
-			{
-				// Get the current value and return
-				// ArrayList we're iterating through
-				return my_list->at(my_position);
-			}
-
-
-			ArrayListIterator operator++()
-			{
-				// Advance ourself, making us look "null/end"-like if we just went
-				// past the end of the attached ArrayList
-				if (on_right == false)
-				{
-					my_position++;
-
-					// Now, if we went past the end of the ArrayList (my_list->size() is helpful!),
-					// make myself look like a "null"-like iterator.
-					if (my_position > my_list->size())
-					{
-						my_list = NULL;
-					}
-				}
-				else if (on_right == true)
-				{
-					my_position--;
-
-					// Now, if we went past the end of the ArrayList (my_list->size() is helpful!),
-					// make myself look like a "null"-like iterator.
-					if (my_position < 0)
-					{
-						my_list = NULL;
-					}
-				}
-
-				return my_position;
-			}
-
-			ArrayListIterator operator++(int not_used)
-			{
-				if (on_right == false)
-				{
-					my_position++;
-
-					// Now, if we went past the end of the ArrayList (my_list->size() is helpful!),
-					// make myself look like a "null"-like iterator.
-					if (my_position > my_list->size())
-					{
-						my_list = NULL;
-					}
-				}
-				else if (on_right == true)
-				{
-					my_position--;
-
-					// Now, if we went past the end of the ArrayList,
-					// make myself look like a "null"-like iterator.
-					if (my_position < 0)
-					{
-						my_list = NULL;
-					}
-				}
-
-				return my_position;
-			}
-
-			ArrayListIterator operator+(int offset)
-			{
-				my_position += offset;
-
-				if (my_position < 0)
-				{
-					my_list = NULL;
-				}
-
-				if (my_position > my_list->size())
-				{
-					my_list = NULL;
-				}
-
-				return my_position;
-			}
-
-
-			bool operator!=(const ArrayListIterator& other_al)
-			{
-				// We're the iterator on the left, the iterator on the right of the != is passed to us
-
-				// I think I have this right. I may be massively overthinking, but if lhs does not equal
-				// rhs, then we need to return true for this method
-				if (this->my_list != other_al.my_list)
-				{
-					return true;
-				}
-				if (this->my_list == other_al.my_list)
-				{
-					return false;
-				}
-			}
-		};
-
-
-		ArrayListIterator begin()
-		{
-			// Tells whether we are starting from left or right
-			//at_right = false;
-
-			// Our job: construct an Iterator value and return it.
-			// this is a pointer to the instance of ArrayList that called this method 
-			//    (like self in Python)
-			ArrayListIterator temp(this, 0, false);
-			return temp;
-		}
-
-
-		ArrayListIterator end()
-		{
-			// Tells whether we are starting from left or right
-			//at_right = false;
-
-			// Our job: construct an null-like Iterator value and return it.
-
-			// Despite the name, this does NOT make an iterator that refers to the LAST value
-			// -- it's a special "null-like" value that you decide on
-
-			ArrayListIterator return_value(NULL,mSize,false);
-			return return_value;
-
-		}
-
-		ArrayListIterator rbegin()
-		{
-			// Tells whether we are starting from left or right
-			//at_right = true;
-
-			ArrayListIterator temp(this, mSize - 1, true);
-			return temp;
-		}
-
-		ArrayListIterator rend() 
-		{
-			// Tells whether we are starting from left or right
-			//at_right = true;
-
-			ArrayListIterator return_value(NULL,-1,true);
-			return return_value;
-		}
-		
-
 
 	protected:
 		/// <summary>
@@ -585,22 +710,17 @@ namespace ssuds
 			if (mSize == mCapacity)
 			{
 				// Allocate what will become the new array
-				unsigned char* new_array = nullptr;
+				T* new_array = nullptr;
 				if (mCapacity == 0)
-				{
-					new_array = new unsigned char[msMinCapacity * sizeof(T)];
-					memset(new_array, 0, msMinCapacity * sizeof(T));
-				}
+					new_array = new T[msMinCapacity];
 				else
-				{
-					new_array = new unsigned char[(mCapacity * 2) * sizeof(T)];
-					memset(new_array, 0, (mCapacity * 2) * sizeof(T));
-				}
+					new_array = new T[mCapacity * 2];
 
 				// Copy over data from the old array (if any)
 				if (mData != nullptr)
 				{
-					memcpy(new_array, mData, sizeof(T) * mSize);
+					for (unsigned int i = 0; i < mSize; i++)
+						new_array[i] = mData[i];
 
 					// Destroy the old array
 					delete[] mData;
@@ -626,12 +746,12 @@ namespace ssuds
 			if (mSize < mCapacity / 4 && mCapacity > msMinCapacity)
 			{
 				// Allocate what will become the new array
-				unsigned char* new_array = new unsigned char[(mCapacity / 2) * sizeof(T)];
-				memset(new_array, 0, (mCapacity / 2) * sizeof(T));
+				T* new_array = new T[mCapacity / 2];
 
 				// Copy over data from the old array (if any)
-				memcpy(new_array, mData, mSize * sizeof(T));
-				
+				for (unsigned int i = 0; i < mSize; i++)
+					new_array[i] = mData[i];
+
 				// Destroy the old array
 				delete[] mData;
 

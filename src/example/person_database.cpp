@@ -60,19 +60,28 @@ example::PersonDatabase::~PersonDatabase()
 {
 	// Write out the data to the file
 	std::ofstream fp(mFilename);
+#ifdef PERSON_DATABASE_USE_NEW_IMPLEMENTATION 
+	for (unsigned int i = 0; i < mArray.size(); i++)
+	{	
+		Person p = mArrayList.at(i);
+#else
 	for (unsigned int i = 0; i < mArraySize; i++)
-	{
+	{ 
 		Person p = mArray[i];
+#endif
+		
 		fp << p.get_id() << " " << p.get_rate() << " " << p.get_hours_worked() << " " << p.get_first_name();
 		fp << " " << p.get_last_name() << "\n";
 	}
 	fp.close();
 
+#ifndef PERSON_DATABASE_USE_NEW_IMPLEMENTATION
 	// Free up the memory.  Note: you do NOT have to free non-dynamically allocated
 	// attribute values (like mArraySize).  You can optionally set these back to default values
 	// BUT, we normally only get to the destructor if our instance is being destroyed, so this
 	// is probably not necessary either
 	delete[] mArray;
+#endif
 }
 
 
@@ -80,10 +89,17 @@ example::PersonDatabase::~PersonDatabase()
 
 void example::PersonDatabase::add_person(Person p)
 {
-	// In this lab, we're taking a naive approach -- each time we add a new Person using this
-	// method, we re-allocate the array to be JUST big enough.  This is kind of costly especially
-	// as we get a lot of things in the array
+	// See if that person already exists -- if we raise an exception it'll get us out of this
+	// function
+	for (unsigned int i = 0; i < mArraySize; i++)
+	{
+		if (mArray[i].get_id() == p.get_id())
+			throw std::runtime_error("Person with id " + std::to_string(p.get_id()) + " already exists!");
+	}
 
+#ifdef PERSON_DATABASE_USE_NEW_IMPLEMENTATION
+	mArrayList.append(p);		// Super easy!
+#else
 	if (mArray == nullptr)
 	{
 		// This is the first item we're adding
@@ -91,13 +107,7 @@ void example::PersonDatabase::add_person(Person p)
 	}
 	else
 	{
-		// See if that person already exists -- if we raise an exception it'll get us out of this
-		// function
-		for (unsigned int i = 0; i < mArraySize; i++)
-		{
-			if (mArray[i].get_id() == p.get_id())
-				throw std::runtime_error("Person with id " + std::to_string(p.get_id()) + " already exists!");
-		}
+		
 
 		// We have data in the array so must copy it to a new larger array (as on the slides)
 		// ...make a larger array
@@ -123,19 +133,27 @@ void example::PersonDatabase::add_person(Person p)
 	// We now have one more item in the array -- account for it!  In this context, it doesn't matter if we
 	// use prefix++ like this or postfix++ (prefix is often ever so slightly faster)
 	++mArraySize;
+#endif
 }
 
 
 
 unsigned int example::PersonDatabase::get_num_people()
 {
+#ifdef PERSON_DATABASE_USE_NEW_IMPLEMENTATION
+	return mArrayList.size();
+#else
 	return mArraySize;
+#endif
 }
 
 
 
 bool example::PersonDatabase::remove_person(unsigned int id)
 {
+#ifdef PERSON_DATABASE_USE_NEW_IMPLEMENTATION
+	mArrayList.remove(id);				// Super simple!
+#else
 	// First, make sure we have this item and store its index;
 	unsigned int index = mArraySize;		// <- invalid index, on purpose!  A real index would
 											//    be less than this amount.
@@ -182,6 +200,7 @@ bool example::PersonDatabase::remove_person(unsigned int id)
 
 		return true;
 	}
+#endif
 }
 
 
@@ -200,9 +219,15 @@ std::string example::PersonDatabase::to_string()
 
 	ss << "Person\tID\tHours\tRate\tMonthly Salary\n";
 	ss << "======\t==\t=====\t====\t==============\n";
+#ifdef PERSON_DATABASE_USE_NEW_IMPLEMENTATION
+	for (unsigned int i = 0; i < mArrayList.size(); i++)
+	{ 
+		Person p = mArrayList.at(i);
+#else
 	for (unsigned int i = 0; i < mArraySize; i++)
 	{
 		Person p = mArray[i];
+#endif
 		ss << p.get_name(false) << "\t" << p.get_id() << "\t" << p.get_hours_worked() << "\t$";
 		float s = p.get_salary();
 		ss << p.get_rate() << "\t$" << s << "\n";

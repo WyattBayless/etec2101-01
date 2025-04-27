@@ -1,6 +1,11 @@
+// array_list.h
 #pragma once
 #include <string>
 #include <person.h>
+#ifdef PERSON_DATABASE_USE_NEW_IMPLEMENTATION
+#include <array_list.h>								// We only need this if using new impl.
+#endif
+
 
 namespace example
 {
@@ -16,6 +21,7 @@ namespace example
 		/// </summary>
 		std::string mFilename;
 
+#if !PERSON_DATABASE_USE_ORIGINAL_IMPLEMENTATION
 		/// <summary>
 		/// The actual array of Person objects we're holding at the moment.
 		/// </summary>
@@ -26,6 +32,13 @@ namespace example
 		/// using std::Vector, ssuds::ArrayList, etc.
 		/// </summary>
 		unsigned int mArraySize;
+#else
+		/// <summary>
+		/// The internal ArrayList used to hold all People objects
+		/// </summary>
+		ssuds::ArrayList<example::Person> mArrayList;
+#endif
+		
 	public:
 		/// <summary>
 		/// This constructor attempts to load people object from the given file.

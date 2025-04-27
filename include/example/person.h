@@ -55,7 +55,7 @@ namespace example
 		/// <summary>
 		/// This is a constructor that takes initial values for most of the attributes
 		/// </summary>
-		Person(std::string starting_fname, std::string starting_lname, unsigned int id, float starting_rate);
+		Person(const std::string& starting_fname, const std::string& starting_lname, unsigned int id, float starting_rate);
 
 	//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	//@ GETTERS / SETTERS               @
@@ -128,5 +128,25 @@ namespace example
 		/// <param name="reset">Set to true if we want to reset the hours worked after calling this method</param>
 		/// <returns></returns>
 		float get_salary(bool reset = false);
+
+
+		Person& operator=(const Person& p)
+		{
+			mFirstName = p.mFirstName;
+			mLastName = p.mLastName;
+			mID = p.mID;
+			mHourlyRate = p.mHourlyRate;
+			mHoursWorked = p.mHoursWorked;
+			return (*this);
+		}
+
+		Person(const Person& p)
+		{
+			mFirstName = p.mFirstName;
+			mLastName = p.mLastName;
+			mID = p.mID;
+			mHourlyRate = p.mHourlyRate;
+			mHoursWorked = p.mHoursWorked;
+		}
 	};
 }
