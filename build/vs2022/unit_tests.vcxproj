@@ -20,6 +20,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\ssuds\array_list.h" />
     <ClInclude Include="..\..\include\ssuds\linked_list.h" />
+    <ClInclude Include="..\..\include\ssuds\maps.h" />
     <ClInclude Include="..\..\include\ssuds\ordered_set.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

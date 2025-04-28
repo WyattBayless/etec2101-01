@@ -307,7 +307,6 @@ namespace ssuds
 			// intentionally empty
 		};
 
-
 		/// <summary>
 		/// The copy-constructor.  Used in these two cases
 		/// ArrayList me(other_array_list);

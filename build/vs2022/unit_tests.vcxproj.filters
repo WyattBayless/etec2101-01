@@ -41,5 +41,8 @@
     <ClInclude Include="..\..\include\ssuds\ordered_set.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\ssuds\maps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
